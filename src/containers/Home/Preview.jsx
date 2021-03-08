@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
 
@@ -60,7 +60,7 @@ const PreviewPage = ({
   const [scrollSpeed, setScrollSpeed] = useState(10);
   const [topY, setTopY] = useState(0);
   const [scrollStarted, setScrollStarted] = useState(false);
-  var scrollInterval = 0;
+  const scrollInterval = useRef(0);
 
   const timerFunction = () => {
     setTopY((topY) => topY - 1);
@@ -68,28 +68,31 @@ const PreviewPage = ({
 
   const keyFunction = useCallback((event) => {
     if (event.keyCode === 27 && fullScreen) {
-      clearInterval(scrollInterval);
+      clearInterval(scrollInterval.current);
       setFullScreen(false);
     }
     if (event.keyCode === 32 && fullScreen) {
       if (scrollStarted == false) {
-        scrollInterval = setInterval(timerFunction, 100);
+        scrollInterval.current = setInterval(timerFunction, 20);
       } else {
-        clearInterval(scrollInterval);
+        clearInterval(scrollInterval.current);
       }
-      console.log("First " + scrollStarted);
-      setTimeout(() => {
-        setScrollStarted(true);
-        console.log("Second " + scrollStarted);
-      }, 100);
+      setScrollStarted((prev) => !prev);
+      // console.log("First " + scrollStarted);
+      // setTimeout(() => {
+      //   setScrollStarted(true);
+      //   console.log("Second " + scrollStarted);
+      // }, 100);
     }
   });
+
   useEffect(() => {
     document.addEventListener("keydown", keyFunction);
-    return () =>{
+    return () => {
       document.removeEventListener("keydown", keyFunction);
-    }
+    };
   });
+
   return (
     <PageContainer isDarkMode={isDarkMode}>
       <PreviewPane
